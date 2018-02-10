@@ -9,7 +9,7 @@ public class Main_Player : MonoBehaviour {
 
   public GameObject musicObject;
   private MusicManager musicScript;
-  private EnvironmentScript environment;
+  //private EnvironmentScript environment;
   public GameObject companionObject;
 
   //Camera
@@ -31,6 +31,8 @@ public class Main_Player : MonoBehaviour {
   private float horzMovement;
   private float vertMovement;
   private float jumpMovement;
+  //private float horzVelocity = 0.0f;
+  //private float vertVelocity = 0.0f;
   //locks
   //private bool walkLock = false;
   private bool jumpLock = false;
@@ -79,9 +81,9 @@ public class Main_Player : MonoBehaviour {
     Vector3 nextPosy = (vertical * forward_pos);
     Vector3 nextPos = (nextPosx + nextPosy) * (walkForce * walkMultiplier);
 
-    if ((horizontal == 0.0f) && (vertical == 0.0f)) {
-      nextPos = new Vector3(0.0f, 0.0f, 0.0f);
-    }
+    //if ((horizontal == 0.0f) && (vertical == 0.0f)) {
+     // nextPos = new Vector3(0.0f, 0.0f, 0.0f);
+    //}
 
     //float ang = Mathf.Acos(Vector3.Dot(transform.forward, nextPos));
     //float angDenominator = transform.forward.magnitude * nextPos.magnitude;
@@ -116,7 +118,7 @@ public class Main_Player : MonoBehaviour {
   private GameObject FindClosestObject(Collider[] colliders, string compareTag) {
     //if there's only one game object, pick that object
     if (colliders.Length == 1) {
-      if (colliders[0].gameObject.tag == compareTag)
+      if ((colliders[0].gameObject.tag == compareTag) && (colliders[0].gameObject != companionObject))
         return colliders[0].gameObject;
       else
         return null;
@@ -127,7 +129,7 @@ public class Main_Player : MonoBehaviour {
       GameObject minObject = null;
 
       for (int i = 0; i < colliders.Length; i++) {
-        if (colliders[i].gameObject.tag == compareTag) {
+        if ((colliders[i].gameObject.tag == compareTag) && (colliders[i].gameObject != companionObject)) {
           GameObject currentCollider = colliders[i].gameObject;
           float tempDist = Mathf.Abs(Vector3.Distance (this.transform.position, currentCollider.transform.position));
           if (tempDist < minDist) {
@@ -143,11 +145,16 @@ public class Main_Player : MonoBehaviour {
   }
   
 
+  void OnTriggerEnter(Collider collider) {
+    if (collider.gameObject.tag == "Level") {
+
+    }
+  }
   void OnCollisionEnter(Collision collider) {
     if (collider.gameObject.tag == "Ground") {
       AttackDestroyScript clone;
       isOnGround = true;
-      environment = collider.gameObject.GetComponent<EnvironmentScript>();
+      //environment = collider.gameObject.GetComponent<EnvironmentScript>();
       clone = (AttackDestroyScript)Instantiate(groundAttack, 
         new Vector3(transform.position.x, collider.gameObject.transform.position.y, transform.position.z), 
         transform.rotation);
@@ -218,15 +225,15 @@ public class Main_Player : MonoBehaviour {
 
           if ((YButton < 0) || (YButton > 0)) {
             //find companion
-            if (companionObject == null) {
-              companionObject = FindClosestObject(hitColliders, "Horse");
+            //if (companionObject == null) {
+             // companionObject = FindClosestObject(hitColliders, "Horse");
               //companionObject = FindClosestObject(hitColliders, "Dog");
-              if (companionObject != null) {
-                controlLock = true;
-                musicScript.ChangeMasterVolume(0.2f);
-              }
-            }
-            else
+            //  if (companionObject != null) {
+            //    controlLock = true;
+                //musicScript.ChangeMasterVolume(0.2f);
+            //  }
+            //}
+            //else
               companionObject = null;
               controlLock = true;
               musicScript.ResetMasterVolume();

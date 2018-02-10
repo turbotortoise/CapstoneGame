@@ -41,7 +41,7 @@ public class EnvironmentScript : MonoBehaviour {
 
 	}
 
-	void OnCollisionEnter(Collision collider) {
+	void OnTriggerEnter(Collider collider) {
 	    if (collider.gameObject.tag == "Player") {
 	    	if ((GameManager.GM.environmentObject != this.gameObject) || (musicScript.walkMusic == null)) {
 		    	GameManager.GM.environmentObject = this.gameObject;

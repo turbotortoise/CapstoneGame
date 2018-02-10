@@ -90,10 +90,24 @@ public class GameManager : MonoBehaviour {
 		List<List<string>> listSections = new List<List<string>>();
 
 		foreach (char c in speech) {
-			print("char: " + c);
-			if (c.Equals("-")) {
-				sections.Add(section);
-				section = "";
+			if (c.ToString().Equals("-") || c.ToString().Equals("\n")) {
+				if (!section.Equals("")) {
+					sections.Add(section);
+					section = "";
+				}
+				else
+					continue;
+			}
+			else if (c.ToString().Equals("/")) {
+				if (!section.Equals("")) {
+					sections.Add(section);
+					listSections.Add(sections);
+					sections = new List<string>();
+					section = "";
+				}
+				else
+					continue;
+
 			}
 			else {
 				section += c.ToString();
@@ -148,9 +162,9 @@ public class GameManager : MonoBehaviour {
 	}
 
 
-	public void receiveText(string text) {
+	public void receiveText(List<string> text) {
 		//SegmentString(text);
-		dialogueList.Add(text);
+		dialogueList = new List<string>(text);
 		textWaitForInput();
 	}
 
@@ -183,12 +197,14 @@ public class GameManager : MonoBehaviour {
 			player.controlLock = true;
 			StartCoroutine(TriggerSwitch("Walk"));
 			displayText.text = "";
+			StartCoroutine(ReleaseLock());
 		} else {
 			//print("showing dialogue");
 			player.controlLock = true;
 			DisplayText(dialogueList[0]);
 			//mutate the list
 			dialogueList.RemoveAt(0);
+			StartCoroutine(ReleaseLock());
 		}
 
 	}

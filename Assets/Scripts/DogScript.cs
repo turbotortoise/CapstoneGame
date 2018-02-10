@@ -17,7 +17,8 @@ public class DogScript : MonoBehaviour {
 	private Vector3 original_position;
 	private bool sentText = false;
 	private float walkSpeed = 2.0f;
-	private string dogSpeech;// = "hi how you doin?!";
+	private string dogSpeech;
+	private List<List<string>> dogSpeechList = new List<List<string>>();
 	private Main_Player player;
 	public float triggerRadius = 5.0f;
 
@@ -27,6 +28,7 @@ public class DogScript : MonoBehaviour {
 		original_position = this.transform.position;
     	musicScript = musicObject.GetComponent<MusicManager>();
     	dogSpeech = bindata.ToString();
+    	dogSpeechList = GameManager.GM.PreparseText(dogSpeech);
 	}
 
 	void Pace() {
@@ -44,7 +46,16 @@ public class DogScript : MonoBehaviour {
 		if (GameManager.GM.walkMode) {
 			if (!sentText) sentText = false;
 			//Check Player Distance
-			if (Vector3.Distance(player.transform.position, transform.position) <= triggerRadius) {
+			if ((player.companionObject != null) && (player.companionObject == this.gameObject)) {
+				//print(this.gameObject + ": companion object");
+				float playerDist = Vector3.Distance (player.transform.position, this.transform.position);
+				if (playerDist > triggerRadius) {
+					transform.LookAt(player.transform.position);
+					this.GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * 
+						(walkSpeed * (playerDist - triggerRadius)) * Time.deltaTime);
+				}
+			}
+			else if (Vector3.Distance(player.transform.position, transform.position) <= triggerRadius) {
 				transform.LookAt(player.transform.position);
 			}
 			else {
@@ -56,9 +67,10 @@ public class DogScript : MonoBehaviour {
 			//Check Converse Status
 			if ((GameManager.GM.converseObject != null) && (GameManager.GM.converseObject == this.gameObject)) {
 				if ((!sentText)) {
+				  player.companionObject = this.gameObject;
 		          sentText = true;
 		          GameManager.GM.isTalking = true;
-		          GameManager.GM.receiveText(dogSpeech);
+		          GameManager.GM.receiveText(dogSpeechList[Random.Range(0, dogSpeechList.Count - 1)]);
 		          musicScript.receiveConverseMusic(audioClip, dog_tempo);
 		        }
 			}

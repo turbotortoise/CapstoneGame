@@ -206,8 +206,6 @@ public class MusicManager : MonoBehaviour {
 						AudioSourceList[fightMusicIndex].clip = fightMusic;
 						AudioSourceList[fightMusicIndex].Play();
 					}
-					if (transitionTrigger) {
-					}
 					//if nothing is playing
 					if (!transitionTrigger) {
 						if (!AudioSourceList[fightMusicIndex].isPlaying) {
@@ -237,7 +235,10 @@ public class MusicManager : MonoBehaviour {
 						print("Transitioning");
 						//enemy hit, move to next clip
 						transitionTrigger = false;
-						enemyProgressIndex ++;
+						if (enemyProgressIndex % 2 == 1)
+							enemyProgressIndex += 2;
+						else
+							enemyProgressIndex++;
 						print("enemyIndex: " + enemyProgressIndex);
 						AudioSourceList[fightMusicIndex].Stop();
 						AudioSourceList[fightMusicIndex].clip = enemy_Music[enemyProgressIndex];
@@ -396,7 +397,7 @@ public class MusicManager : MonoBehaviour {
 				AudioSourceList[fightMusicIndex].clip = null;
 				fightMusicIndex = -1;
 			}
-			if (converseMusic != null) {
+			if ((converseMusicIndex >= 0) && (converseMusic != null)) {
 				converseMusic = null;
 				AudioSourceList[converseMusicIndex].Stop();
 				AudioSourceList[converseMusicIndex].clip = null;

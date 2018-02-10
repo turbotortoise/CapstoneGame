@@ -33,12 +33,13 @@ public class SpiderScript : MonoBehaviour {
   //Text
   public TextAsset bindata;
   private bool sentText = false;
+  public List<List<string>> spiderTextList = new List<List<string>>();
   private bool onGround = false;
   private string spiderText;
   private float prevWalkTime = 0.0f;
   public float walkWaitTime = 5.0f;
   private int followTrigger = 1;
-  //private int interactivity = 0; //the number of times talked to player
+  private int interactivity = 0; //the number of times talked to player
 
   //Enemy settings
   private float attackRadius = 10.0f;
@@ -78,6 +79,7 @@ public class SpiderScript : MonoBehaviour {
     //grab text
     //bindata = Resources.Load("DogText") as TextAsset;
     spiderText = bindata.ToString();
+    spiderTextList = GameManager.GM.PreparseText(spiderText);
   }
 
   void Jump(float x, float y, Vector3 dir) {
@@ -179,6 +181,21 @@ public class SpiderScript : MonoBehaviour {
       onGround = false;
     }
   }
+
+  List<string> FindText(List<List<string>> textList) {
+    List<string> list = new List<string>();
+
+    if (textList.Count == 0)
+      list = null;
+
+    if (interactivity >= textList.Count)
+      list =  new List<string>(textList[textList.Count - 1]);
+    else
+      list = new List<string>(textList[interactivity]);
+
+    interactivity++;
+    return list;
+  }
   
   // Update is called once per frame
   void Update () {
@@ -201,7 +218,7 @@ public class SpiderScript : MonoBehaviour {
         if ((GameManager.GM.converseObject == this.gameObject) && (!sentText)) {
           sentText = true;
           GameManager.GM.isTalking = true;
-          GameManager.GM.receiveText(spiderText);
+          GameManager.GM.receiveText(FindText(spiderTextList));
           musicScript.receiveConverseMusic(talkMusic, spider_tempo);
         }
       }
