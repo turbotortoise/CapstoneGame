@@ -18,6 +18,8 @@ public class Main_Player : MonoBehaviour {
   private float rotateSpeed = 100f;
   private float walkForce = 10.0f;
   private float jumpForce = 200.0f;
+  public float velocity = 0.0f;
+  public float acceleration = 1.0f;
   //private float rotateMultiplier = 1.0f;
   private float walkMultiplier = 1.0f;
   private float jumpMultiplier = 1.0f;
@@ -65,11 +67,10 @@ public class Main_Player : MonoBehaviour {
     Renderer rend = GetComponent<Renderer>();
     rend.material.shader = Shader.Find("Diffuse");
     rend.material.SetColor("_Color", color);
-
   }
 
   public void ChangeAttributes(float env_gravity, float env_air_resist) {
-    walkMultiplier = (0.01f / env_air_resist);
+    acceleration = env_air_resist;
     jumpMultiplier = env_gravity;
     //rotateMultiplier = env_air_resist;
   }
@@ -79,12 +80,22 @@ public class Main_Player : MonoBehaviour {
     Vector3 nextPosx = (horizontal * camera_transform.right);
     Vector3 forward_pos = (Quaternion.Euler(0, -90, 0) * camera_transform.right);
     Vector3 nextPosy = (vertical * forward_pos);
-    Vector3 nextPos = (nextPosx + nextPosy) * (walkForce * walkMultiplier);
 
-    //if ((horizontal == 0.0f) && (vertical == 0.0f)) {
-     // nextPos = new Vector3(0.0f, 0.0f, 0.0f);
-    //}
+    /*if ((horizontal != 0.0f) || (vertical != 0.0f)) {
+      velocity += (acceleration * Time.deltaTime);
+    }
+    else if ((horizontal == 0.0f) && (vertical == 0.0f)) {
+      velocity -= (acceleration * Time.deltaTime);
+    }
+    if (velocity <= 0.0f)
+      velocity = 0.0f;
+    else if (velocity >= walkForce)
+      velocity = walkForce;*/
 
+    Vector3 nextPos = (nextPosx + nextPosy);// * velocity;
+    //rigidbody.AddForce(nextPos.normalized * velocity);
+    if (nextPos != Vector3.zero)
+      transform.Translate(nextPos * walkForce * Time.deltaTime);
     //float ang = Mathf.Acos(Vector3.Dot(transform.forward, nextPos));
     //float angDenominator = transform.forward.magnitude * nextPos.magnitude;
     //if (angDenominator != 0.0f)
@@ -95,11 +106,6 @@ public class Main_Player : MonoBehaviour {
     //rotate
     //transform.Rotate(Vector3.up, rotateSpeed * ang);
     //transform.Rotate(transform.up, ang * Time.deltaTime);
-
-    //move
-    //rb.MovePosition(transform.position + nextPos);
-    //nextPos = new Vector3(nextPos.x, 0.0f, nextPos.z);
-    transform.Translate(nextPos * Time.deltaTime);
 
     //jump
     if (isOnGround) {

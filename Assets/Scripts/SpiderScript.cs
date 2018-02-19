@@ -44,6 +44,7 @@ public class SpiderScript : MonoBehaviour {
   //Enemy settings
   private float attackRadius = 10.0f;
   private int enemy_health = 3;
+  public AudioSource audioSource;
   public AudioClip alertMusic; //clip triggered when player is discovered
   public AudioClip fightMusic_1; //stage 1 soundtrack
   public AudioClip fightMusic_2; //stage 2 soundtrack
@@ -51,6 +52,8 @@ public class SpiderScript : MonoBehaviour {
   public AudioClip transition_1; //transition to second soundtrack
   public AudioClip transition_2; //transition to third soundtrack
   public AudioClip defeatMusic; //clip triggered when health reaches 0
+  public AudioClip jump_sound; //clip triggered when spider jumps
+  public AudioClip attack_sound; //clip triggered when spider attacks
   public int spider_tempo;
   //Type of attack varies on species
   public AttackDestroyScript groundAttack;
@@ -64,6 +67,7 @@ public class SpiderScript : MonoBehaviour {
 
   // Use this for initialization
   void Start () {
+    //audioSource = this.AudioSource;
     startPos= this.transform.position;
     rb = GetComponent<Rigidbody>();
     musicScript = musicObject.GetComponent<MusicManager>();
@@ -84,8 +88,11 @@ public class SpiderScript : MonoBehaviour {
 
   void Jump(float x, float y, Vector3 dir) {
     if (onGround) {
-      transform.Translate(dir * (x * spider_speed) * Time.deltaTime);
+      rb.AddForce(dir * (x * spider_speed));
       rb.AddForce(transform.up * (y * jump_height));
+      //musicScript.receiveSoundEffect(jump_sound);
+      audioSource.clip = jump_sound;
+      audioSource.Play();
     }
   }
 
@@ -113,7 +120,7 @@ public class SpiderScript : MonoBehaviour {
     float distFromOrigin = Vector3.Distance (transform.position, startPos);
     if (distFromOrigin >= triggerRadius) {
       //too far from origin
-      if (((prevWalkTime + (walkWaitTime / 4.0f)) <= Time.time) && (onGround)) {
+      if (((prevWalkTime + walkWaitTime) <= Time.time) && (onGround)) {
         prevWalkTime = Time.time;
         //calculate angle
         float angle = Vector3.Angle(startPos, transform.forward);
@@ -126,15 +133,11 @@ public class SpiderScript : MonoBehaviour {
     }
     else {
       //within radius, keep walking around
-      if ((prevWalkTime + walkWaitTime) <= Time.time) {
+      if (((prevWalkTime + walkWaitTime) <= Time.time) && (onGround)) {
         prevWalkTime = Time.time;
         Jump(1.0f, 1.0f, transform.forward);
       }
     }
-  }
-
-  void Roaming() {
-    transform.Translate(new Vector3(Random.Range(-0.02f, 0.02f), Random.Range(-0.02f, 0.02f), Random.Range(-0.02f, 0.02f)));
   }
 
   void Attack() {
@@ -142,7 +145,12 @@ public class SpiderScript : MonoBehaviour {
     if (((prevWalkTime + walkWaitTime) <= Time.time) && (onGround)) {
       isAttacking = true;
       prevWalkTime = Time.time;
-      Jump(playerDist * attack_speed, 0.2f, (player.position - transform.position).normalized);
+      //Jump(playerDist * attack_speed, 0.2f, (player.position - transform.position).normalized);
+      rb.AddForce((player.position - transform.position).normalized * ((playerDist * attack_speed) * spider_speed));
+      rb.AddForce(transform.up * (0.2f * jump_height));
+      //musicScript.receiveSoundEffect(attack_sound);
+      audioSource.clip = attack_sound;
+      audioSource.Play();
     }
   }
 
@@ -164,7 +172,7 @@ public class SpiderScript : MonoBehaviour {
           isStable = true;
           this.tag = "Friend";
           GameManager.GM.Switch("Walk");
-          triggerRadius = 5.0f;
+          triggerRadius /= 2.0f;
         }
       }
       else if (isAttacking) {

@@ -47,7 +47,6 @@ public class DogScript : MonoBehaviour {
 			if (!sentText) sentText = false;
 			//Check Player Distance
 			if ((player.companionObject != null) && (player.companionObject == this.gameObject)) {
-				//print(this.gameObject + ": companion object");
 				float playerDist = Vector3.Distance (player.transform.position, this.transform.position);
 				if (playerDist > triggerRadius) {
 					transform.LookAt(player.transform.position);

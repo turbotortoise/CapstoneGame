@@ -53,6 +53,7 @@
      <Compile Include="Assets\Scripts\Enemy.cs" />
      <Compile Include="Assets\Scripts\EnvironmentScript.cs" />
      <Compile Include="Assets\Scripts\GameManager.cs" />
+     <Compile Include="Assets\Scripts\GravityScript.cs" />
      <Compile Include="Assets\Scripts\HorseScript.cs" />
      <Compile Include="Assets\Scripts\LevelTransitionScript.cs" />
      <Compile Include="Assets\Scripts\LizardScript.cs" />

@@ -21,7 +21,7 @@ public class EnvironmentScript : MonoBehaviour {
 
 	//Environment qualities
 	public float gravity;
-	public float air_resistance;
+	public float top_acceleration;
 	public float ground_hardiness;
 
 	//public GameObject reverbReaction;
@@ -37,12 +37,14 @@ public class EnvironmentScript : MonoBehaviour {
 
 	void SetGravityAttributes(Main_Player player) {
 		//changes how the collider moves in this space.
-		player.ChangeAttributes(gravity, air_resistance);
+		player.ChangeAttributes(gravity, top_acceleration);
+		//player.isOnGround = true;
 
 	}
 
 	void OnTriggerEnter(Collider collider) {
 	    if (collider.gameObject.tag == "Player") {
+	    	print("collided with player");
 	    	if ((GameManager.GM.environmentObject != this.gameObject) || (musicScript.walkMusic == null)) {
 		    	GameManager.GM.environmentObject = this.gameObject;
 		    	musicScript.receiveWalkMusic(environmentMusic, transitionMusic, tempo);
@@ -61,7 +63,7 @@ public class EnvironmentScript : MonoBehaviour {
  		int prevCount = worldEnemies.Count;
  		int removeAt = -1;
  		for (int i = 0; i < worldEnemies.Count; i++) {
- 			if (worldEnemies[i] == null)
+ 			if ((worldEnemies[i] == null) || (worldEnemies[i].tag == "Friend"))
  				removeAt = i;
  		}
  		if (removeAt >= 0) {
@@ -93,9 +95,18 @@ public class EnvironmentScript : MonoBehaviour {
 					environmentMusic = soundStage3;
 			}
 			else if (stage == 3) {
+				if (environmentMusic != soundStage4)
+					environmentMusic = soundStage4;
 
 			}
 			else if (stage == 4) {
+				if (environmentMusic != soundStage5)
+					environmentMusic = soundStage5;
+
+			}
+			else if (stage == 5) {
+				if (environmentMusic != soundStage6)
+					environmentMusic = soundStage6;
 
 			}
 		}
