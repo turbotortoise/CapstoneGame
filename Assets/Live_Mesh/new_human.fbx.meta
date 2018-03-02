@@ -203,69 +203,28 @@ ModelImporter:
       heightFromFeet: 0
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
+      curves:
+      - name: Curve
+        curve:
+          serializedVersion: 2
+          curve:
+          - serializedVersion: 2
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+          - serializedVersion: 2
+            time: 1
+            value: 1
+            inSlope: 2
+            outSlope: 2
+            tangentMode: 0
+          preInfinity: 2
+          postInfinity: 2
+          rotationOrder: 0
       events: []
-      transformMask:
-      - path: 
-        weight: 1
-      - path: body
-        weight: 1
-      - path: body/transform6
-        weight: 1
-      - path: body1
-        weight: 1
-      - path: body1/transform8
-        weight: 1
-      - path: group2
-        weight: 1
-      - path: group2/left_leg
-        weight: 1
-      - path: group2/left_leg/transform4
-        weight: 1
-      - path: group3
-        weight: 1
-      - path: group3/left_arm
-        weight: 1
-      - path: group3/left_arm/transform1
-        weight: 1
-      - path: head
-        weight: 1
-      - path: head/transform3
-        weight: 1
-      - path: joint1
-        weight: 1
-      - path: joint1/joint2
-        weight: 1
-      - path: joint1/joint3
-        weight: 1
-      - path: joint1/joint4
-        weight: 1
-      - path: joint1/joint4/joint5
-        weight: 1
-      - path: joint1/joint4/joint5/joint6
-        weight: 1
-      - path: joint1/joint4/joint7
-        weight: 1
-      - path: joint1/joint4/joint7/joint8
-        weight: 1
-      - path: joint1/joint4/joint9
-        weight: 1
-      - path: mirrorCutPlane1
-        weight: 1
-      - path: mirroredCutMesh1
-        weight: 1
-      - path: mirroredCutMesh1/transform7
-        weight: 1
-      - path: polySurface1
-        weight: 1
-      - path: right_arm
-        weight: 1
-      - path: right_arm/transform2
-        weight: 1
-      - path: right_leg
-        weight: 1
-      - path: right_leg/transform5
-        weight: 1
+      transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0

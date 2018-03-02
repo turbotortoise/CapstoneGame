@@ -21,8 +21,9 @@ public class EnvironmentScript : MonoBehaviour {
 
 	//Environment qualities
 	public float gravity;
-	public float top_acceleration;
+	public float acceleration;
 	public float ground_hardiness;
+	public Vector3 PlayerSpawnPoint;
 
 	//public GameObject reverbReaction;
 
@@ -37,7 +38,7 @@ public class EnvironmentScript : MonoBehaviour {
 
 	void SetGravityAttributes(Main_Player player) {
 		//changes how the collider moves in this space.
-		player.ChangeAttributes(gravity, top_acceleration);
+		player.ChangeAttributes(gravity, acceleration);
 		//player.isOnGround = true;
 
 	}

@@ -16,10 +16,12 @@ public class SpiderScript : MonoBehaviour {
   private Rigidbody rb;
   private Vector3 startPos;
   public bool isStable;
+  public bool random_text;
   public float triggerRadius;
   public float spider_speed;
   public float jump_height;
   public float attack_speed;
+  public float attack_power;
 
   [SerializeField]Transform player;
   public GameObject musicObject;
@@ -31,13 +33,17 @@ public class SpiderScript : MonoBehaviour {
   //private float walkSpeed = 1.0f;
   //private float rotateSpeed = 1.0f;
   //Text
-  public TextAsset bindata;
+  public TextAsset textData;
+  public TextAsset musicData;
   private bool sentText = false;
-  public List<List<string>> spiderTextList = new List<List<string>>();
+  private List<List<string>> spiderTextList = new List<List<string>>();
+  private List<List<int>> spiderMusicList = new List<List<int>>();
+  int music_section = 0;
+  int music_measure = 0;
   private bool onGround = false;
   private string spiderText;
   private float prevWalkTime = 0.0f;
-  public float walkWaitTime = 5.0f;
+  private float walkWaitTime;
   private int followTrigger = 1;
   private int interactivity = 0; //the number of times talked to player
 
@@ -45,6 +51,7 @@ public class SpiderScript : MonoBehaviour {
   private float attackRadius = 10.0f;
   private int enemy_health = 3;
   public AudioSource audioSource;
+  public AudioClip talkMusic;
   public AudioClip alertMusic; //clip triggered when player is discovered
   public AudioClip fightMusic_1; //stage 1 soundtrack
   public AudioClip fightMusic_2; //stage 2 soundtrack
@@ -60,20 +67,16 @@ public class SpiderScript : MonoBehaviour {
   //priority varies on species
   public int priority;
   private bool isAttacking = false;
-  //private float attackPower;
 
-  //Audio settings
-  public AudioClip talkMusic;
-
-  // Use this for initialization
   void Start () {
     //audioSource = this.AudioSource;
-    startPos= this.transform.position;
+    startPos = this.transform.position;
     rb = GetComponent<Rigidbody>();
     musicScript = musicObject.GetComponent<MusicManager>();
+    walkWaitTime = ((60.0f / spider_tempo) / 4.0f);
     //playerScript = GetComponent<Main_Player>();
-    if (isStable)
-      triggerRadius = 5.0f;
+    //if (isStable)
+    //  triggerRadius = 5.0f;
 
     //set color (for not white everything)
     Renderer rend = GetComponent<Renderer>();
@@ -81,9 +84,12 @@ public class SpiderScript : MonoBehaviour {
     rend.material.SetColor("_Color", color);
 
     //grab text
-    //bindata = Resources.Load("DogText") as TextAsset;
-    spiderText = bindata.ToString();
+    //textData = Resources.Load("DogText") as TextAsset;
+    spiderText = textData.ToString();
     spiderTextList = GameManager.GM.PreparseText(spiderText);
+    spiderText = musicData.ToString();
+    spiderMusicList = GameManager.GM.PreparseMusic(spiderText);
+
   }
 
   void Jump(float x, float y, Vector3 dir) {
@@ -98,18 +104,26 @@ public class SpiderScript : MonoBehaviour {
 
   void FollowPlayer() {
     transform.LookAt(new Vector3(player.position.x, this.transform.position.y, player.position.z));
-    if ((prevWalkTime + walkWaitTime) <= Time.time) {
+    int currentMeasure = spiderMusicList[music_section][music_measure];
+
+    if ((prevWalkTime + (walkWaitTime * currentMeasure) <= Time.time)) {
       prevWalkTime = Time.time;
-      if (followTrigger == 0) {
-        //move right
-        followTrigger = 1;
-        Jump(2.0f, 0.5f, transform.right);
+      if (onGround) {
+        if (followTrigger == 0) {
+          //move right
+          Jump(2.0f, 0.5f, currentMeasure * transform.right);
+        }
+        else {
+          //move left
+          Jump(2.0f, 0.5f, -1.0f * currentMeasure * transform.right);
+        }
+        followTrigger = (currentMeasure % 2);
       }
-      else {
-        //move left
-        followTrigger = 0;
-        Jump(2.0f, 0.5f, -1.0f * transform.right);
-      }
+
+      if (music_measure < (spiderMusicList[music_section].Count - 1)) 
+        music_measure++;
+      else 
+        music_measure = 0;
     }
   }
 
@@ -120,15 +134,19 @@ public class SpiderScript : MonoBehaviour {
     float distFromOrigin = Vector3.Distance (transform.position, startPos);
     if (distFromOrigin >= triggerRadius) {
       //too far from origin
-      if (((prevWalkTime + walkWaitTime) <= Time.time) && (onGround)) {
+      if ((prevWalkTime + walkWaitTime) <= Time.time) {
         prevWalkTime = Time.time;
-        //calculate angle
-        float angle = Vector3.Angle(startPos, transform.forward);
-        //if angle is great enough, keep rotating
-        if (angle >= 20.0f)
-          transform.Rotate(Vector3.up, Random.Range(0.2f, 0.3f));
-        else
-          Jump(1.0f, 1.0f, transform.forward);
+        if (onGround) {
+          //calculate angle
+          float angle = Vector3.Angle(startPos, transform.forward);
+          //if angle is great enough, keep rotating
+          if (angle <= 90.0f)
+            transform.Rotate(Vector3.up, Random.Range(0.2f, 0.3f));
+          else if (angle <= 180.0f) {
+            transform.Rotate(Vector3.up, Random.Range(-0.3f, -0.2f));
+            Jump(1.0f, 1.0f, transform.forward);
+          }
+        }
       }
     }
     else {
@@ -140,33 +158,37 @@ public class SpiderScript : MonoBehaviour {
     }
   }
 
-  void Attack() {
-    transform.LookAt(new Vector3(player.position.x, this.transform.position.y, player.position.z));
-    if (((prevWalkTime + walkWaitTime) <= Time.time) && (onGround)) {
-      isAttacking = true;
-      prevWalkTime = Time.time;
-      //Jump(playerDist * attack_speed, 0.2f, (player.position - transform.position).normalized);
-      rb.AddForce((player.position - transform.position).normalized * ((playerDist * attack_speed) * spider_speed));
-      rb.AddForce(transform.up * (0.2f * jump_height));
-      //musicScript.receiveSoundEffect(attack_sound);
-      audioSource.clip = attack_sound;
-      audioSource.Play();
-    }
+  IEnumerator Attack(Vector3 playerPos) {
+    isAttacking = true;
+    transform.LookAt(new Vector3(playerPos.x, transform.position.y, playerPos.z));
+    int currentMeasure = spiderMusicList[music_section][music_measure];
+
+    //Jump Backwards
+    if ((prevWalkTime + (walkWaitTime * currentMeasure)) > Time.time)
+      yield return new WaitForSeconds((prevWalkTime + (walkWaitTime * currentMeasure)) - Time.time);
+    prevWalkTime = Time.time;
+    if (onGround) Jump(-attack_speed, 2.0f, (playerPos - transform.position).normalized);
+    //Jump Forward
+    yield return new WaitForSeconds(((prevWalkTime + (walkWaitTime * currentMeasure)) - Time.time) * 3.0f);
+    prevWalkTime = Time.time;
+    if (onGround) Jump(attack_speed, 3.0f, (playerPos - transform.position).normalized);
+    yield return new WaitForSeconds(((prevWalkTime + (walkWaitTime * currentMeasure)) - Time.time) * 4.0f);
+    isAttacking = false;
   }
 
   void OnCollisionEnter(Collision collider) {
     if (collider.gameObject.tag == "Ground") {
       AttackDestroyScript clone;
       onGround = true;
-      if (isAttacking) isAttacking = false;
       clone = (AttackDestroyScript)Instantiate(groundAttack, 
         new Vector3(transform.position.x, collider.gameObject.transform.position.y, transform.position.z), transform.rotation);
       clone.gameObject.transform.rotation = collider.gameObject.transform.rotation;
       clone.tempo = spider_tempo;
     }
     else if (collider.gameObject.tag == "Player") {
-      if ((!isStable) && (enemy_health > 0) && (GameManager.GM.fightMode) && (GameManager.GM.fightObject == this.gameObject) && (!isAttacking)) {
+      if ((!isStable) && (enemy_health > 0) && (GameManager.GM.fightMode) && (!isAttacking)) {
         enemy_health --;
+        if (music_section < (spiderMusicList.Count - 1)) music_section++;
         musicScript.transitionTrigger = true;
         if (enemy_health == 0) {
           isStable = true;
@@ -179,6 +201,7 @@ public class SpiderScript : MonoBehaviour {
         isAttacking = false;
         prevWalkTime = Time.time;
         //player health --
+        StartCoroutine(player.gameObject.GetComponent<Main_Player>().Damaged(attack_power));
         Jump(attack_speed, 1.0f, (transform.position - player.position).normalized);
       }
     }
@@ -196,10 +219,15 @@ public class SpiderScript : MonoBehaviour {
     if (textList.Count == 0)
       list = null;
 
-    if (interactivity >= textList.Count)
-      list =  new List<string>(textList[textList.Count - 1]);
-    else
-      list = new List<string>(textList[interactivity]);
+    if (random_text) {
+      list = new List<string>(textList[(Random.Range(0, textList.Count - 1))]);
+    }
+    else {
+      if (interactivity >= textList.Count)
+        list =  new List<string>(textList[textList.Count - 1]);
+      else
+        list = new List<string>(textList[interactivity]);
+    }
 
     interactivity++;
     return list;
@@ -236,19 +264,21 @@ public class SpiderScript : MonoBehaviour {
     //Enemy
     else if (!isStable) {
       if (GameManager.GM.fightMode) {
-        if (playerDist <= (triggerRadius)) {
-          if (playerDist <= attackRadius) {
-            Attack();
-            if (onGround) isAttacking = false;
+        if (musicScript.transitionTrigger && (music_section < (spiderMusicList.Count - 1)) && (music_section % 2 == 0)) music_section++;
+        if (!isAttacking) {
+          if (playerDist <= (triggerRadius)) {
+            if ((playerDist <= attackRadius) && (!isAttacking)) {
+              StartCoroutine(Attack(player.position));
+            }
+            else {
+              FollowPlayer();
+            }
           }
-          else {
-            FollowPlayer();
+          else if ((playerDist > triggerRadius) && (GameManager.GM.fightObject == this.gameObject)) {
+            print("Player ran away");
+            GameManager.GM.fightObject = null;
+            StartCoroutine(GameManager.GM.CheckForUpdates());
           }
-        }
-        else if ((playerDist > triggerRadius) && (GameManager.GM.fightObject == this.gameObject)) {
-          print("Player ran away");
-          GameManager.GM.fightObject = null;
-          StartCoroutine(GameManager.GM.CheckForUpdates());
         }
       }
       else if (GameManager.GM.walkMode) {
@@ -262,6 +292,8 @@ public class SpiderScript : MonoBehaviour {
               GameManager.GM.PriorityFightObject(this.gameObject, priority); //set this to fight object if there is higher priority
             }
             GameManager.GM.Switch("Fight");
+            prevWalkTime = Time.time;
+            music_measure = 0;
             musicScript.receiveFightMusic(alertMusic, fightMusic_1, fightMusic_2, fightMusic_3,
                                           transition_1, transition_2, defeatMusic, spider_tempo);
           }

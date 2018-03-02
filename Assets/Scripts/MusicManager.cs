@@ -412,10 +412,10 @@ public class MusicManager : MonoBehaviour {
 			}
 		}
 		else if (GameManager.GM.fightMode) {
-			if (player.isHit) {
-				player.isHit = false;
-				AudioQueue.Add(player.hitEffect);
-			}
+			//if (player.isHit) {
+			//	player.isHit = false;
+			//	AudioQueue.Add(player.hitEffect);
+			//}
 
 			if (fightMusic != null) {
 				if (fightMusicIndex == -1) {

@@ -15,7 +15,7 @@ public class Main_Player : MonoBehaviour {
   //Camera
   //[SerializeField]Transform camera;
   //Force of Movement variables
-  private float rotateSpeed = 100f;
+  private float rotateSpeed = 1000f;
   private float walkForce = 10.0f;
   private float jumpForce = 200.0f;
   public float velocity = 0.0f;
@@ -25,6 +25,7 @@ public class Main_Player : MonoBehaviour {
   private float jumpMultiplier = 1.0f;
   private Vector3 offsetX;
   private Vector3 offsetY;
+  private Vector3 velocityVector;
 
   //private float regenSpeed = 2f;
   public bool controlLock = false;
@@ -53,9 +54,12 @@ public class Main_Player : MonoBehaviour {
   public float sphereColliderRadius = 10.0f;
   public float enemyColliderRadius = 20.0f;
   //Health
-  //private float healthBar = 100f;
+  private float healthBar = 100f;
   //Attacks
   public AttackDestroyScript groundAttack;
+
+  //Game State
+  public bool GameOver = false;
 
   // Use this for initialization
   void Start () {
@@ -75,37 +79,60 @@ public class Main_Player : MonoBehaviour {
     //rotateMultiplier = env_air_resist;
   }
 
+  public IEnumerator Damaged(float damage) {
+    controlLock = true;
+    healthBar -= damage;
+    if (healthBar <= 0.0f) {
+      GameOver = true;
+      GameManager.GM.TriggerGameOver();
+      healthBar = 100.0f;
+    }
+    yield return new WaitForSeconds(1.0f);
+    isHit = false;
+    controlLock = false;
+  }
+
   private void Move (float horizontal, float vertical, float jump) {
 
     Vector3 nextPosx = (horizontal * camera_transform.right);
     Vector3 forward_pos = (Quaternion.Euler(0, -90, 0) * camera_transform.right);
     Vector3 nextPosy = (vertical * forward_pos);
+    Vector3 nextPos = (nextPosx + nextPosy);
 
-    /*if ((horizontal != 0.0f) || (vertical != 0.0f)) {
-      velocity += (acceleration * Time.deltaTime);
+    //calculate velocity
+    //ramp up
+    if (velocity < (Mathf.Abs(horizontal) + Mathf.Abs(vertical))) {
+      if (isOnGround) velocity += acceleration * 0.15f;
+      else velocity += acceleration * 0.05f;
+
+      if (velocity > 1.0f) velocity = 1.0f;
     }
-    else if ((horizontal == 0.0f) && (vertical == 0.0f)) {
-      velocity -= (acceleration * Time.deltaTime);
+    //ramp down
+    if (velocity > (Mathf.Abs(horizontal) + Mathf.Abs(vertical))) {
+      if (isOnGround) velocity -= acceleration * 0.15f;
+      else velocity -= acceleration * 0.05f;
+
+      if (velocity < 0.0f) velocity = 0.0f;
     }
-    if (velocity <= 0.0f)
-      velocity = 0.0f;
-    else if (velocity >= walkForce)
-      velocity = walkForce;*/
 
-    Vector3 nextPos = (nextPosx + nextPosy);// * velocity;
-    //rigidbody.AddForce(nextPos.normalized * velocity);
-    if (nextPos != Vector3.zero)
-      transform.Translate(nextPos * walkForce * Time.deltaTime);
-    //float ang = Mathf.Acos(Vector3.Dot(transform.forward, nextPos));
-    //float angDenominator = transform.forward.magnitude * nextPos.magnitude;
-    //if (angDenominator != 0.0f)
-    //else
-    //  ang = 0.0f;
+    //calculate next position
+    if (nextPos == Vector3.zero) {
+      nextPos = velocityVector * velocity;
+    }
+    else {
+      nextPos = ((velocityVector + nextPos) / ((velocityVector.magnitude + nextPos.magnitude))) * velocity;
+    }
+    transform.Translate(nextPos * walkForce * Time.deltaTime);
 
-    //print("angle: " + (Mathf.Rad2Deg * ang) + ", Denominator: " + angDenominator);
-    //rotate
-    //transform.Rotate(Vector3.up, rotateSpeed * ang);
-    //transform.Rotate(transform.up, ang * Time.deltaTime);
+    //Translate
+    velocityVector = nextPos;
+
+    //Rotate
+    //float step = rotateSpeed * Time.deltaTime;
+    //Vector3 newDir = Vector3.RotateTowards(transform.forward, nextPos, step, 0.0f);
+    //Debug.DrawRay(transform.position, newDir, Color.red);
+    //transform.rotation = Quaternion.LookRotation(newDir);
+
 
     //jump
     if (isOnGround) {
@@ -151,13 +178,13 @@ public class Main_Player : MonoBehaviour {
   }
   
 
-  void OnTriggerEnter(Collider collider) {
+  void OnCollisionEnter(Collision collider) {
+
     if (collider.gameObject.tag == "Level") {
 
     }
-  }
-  void OnCollisionEnter(Collision collider) {
-    if (collider.gameObject.tag == "Ground") {
+    else if (collider.gameObject.tag == "Ground") {
+      GameManager.GM.environmentObject = collider.gameObject;
       AttackDestroyScript clone;
       isOnGround = true;
       //environment = collider.gameObject.GetComponent<EnvironmentScript>();
@@ -165,10 +192,13 @@ public class Main_Player : MonoBehaviour {
         new Vector3(transform.position.x, collider.gameObject.transform.position.y, transform.position.z), 
         transform.rotation);
       clone.tempo = (int)musicScript.tempo;
+
     }
-    if (collider.gameObject.tag == "Enemy") {
+
+    if ((collider.gameObject.tag == "Enemy") && (!isHit)) {
       //musicScript.enemyHit = true;
       isHit = true;
+      StartCoroutine(Damaged(10.0f));
     }
     if (collider.gameObject.tag == "AudioTrigger") {
       //grab its info and pass it to music manager
@@ -176,7 +206,7 @@ public class Main_Player : MonoBehaviour {
   }
 
   void OnCollisionExit(Collision collider) {
-    if (collider.gameObject.tag == "Ground") {
+    if ((collider.gameObject.tag == "Ground") && (collider.gameObject == GameManager.GM.environmentObject)) {
       isOnGround = false;
     }
   }

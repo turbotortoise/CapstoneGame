@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,6 +25,14 @@ public class Meche_TreeScript : MonoBehaviour {
   	public AudioClip transition_2;
   	public AudioClip defeatMusic;
   	public int tree_tempo;
+
+  	//references to body
+  	public GameObject body;
+  	private float body_velocity;
+  	private float head_velocity;
+  	public GameObject head;
+  	public GameObject left_arm;
+  	public GameObject right_arm;
 
 	// Use this for initialization
 	void Start () {

@@ -63,8 +63,8 @@ public class CameraScript : MonoBehaviour {
 		}
 		else if (GameManager.GM.fightMode) {
 			if (trigMovement > 0) {
-				rotate_x = 0.0f;
-				rotate_z = -80.0f;
+				//rotate_x = 0.0f;
+				//rotate_z = -80.0f;
 				Transform fightTransform = GameManager.GM.fightObject.transform;
 				RotateScale = Vector3.Distance(GameManager.GM.fightObject.transform.position, target.position) * new Vector3(0.01f, 0.01f, 0.01f);
 				FocusPosition = fightTransform.position;

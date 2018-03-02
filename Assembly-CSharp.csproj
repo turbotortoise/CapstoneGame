@@ -65,10 +65,14 @@
      <Compile Include="Assets\Scripts\SphereDetection.cs" />
      <Compile Include="Assets\Scripts\SpiderScript.cs" />
      <None Include="Assets\Scripts\Text\Spider_Village\GoldenDogText.txt" />
+     <None Include="Assets\Scripts\Text\Spider_Woods\VillageSpiderMusic.txt" />
      <None Include="Assets\Scripts\Text\Spider_Village\OrbSpiderText.txt" />
      <None Include="Assets\Scripts\Text\Spider_Village\JumperSpiderText.txt" />
+     <None Include="Assets\Scripts\Text\Spider_Woods\HiddenSpiderMusic.txt" />
      <None Include="Assets\Scripts\Text\Spider_Village\SpoolSpiderText.txt" />
+     <None Include="Assets\Scripts\Text\Spider_Woods\SmallSpiderEnemyMusic.txt" />
      <None Include="Assets\Scripts\Text\Spider_Village\SpeckSpiderText.txt" />
+     <None Include="Assets\Scripts\Text\Spider_Woods\MediumSpiderEnemyMusic.txt" />
      <None Include="Assets\Scripts\Text\Spider_Village\EnemySpiderText.txt" />
      <None Include="Assets\Scripts\Text\Spider_Village\HiddenSpiderText.txt" />
      <None Include="Assets\Scripts\Text\Spider_Village\SpepSpiderText.txt" />

@@ -115,6 +115,22 @@ public class GameManager : MonoBehaviour {
 		}
 		return listSections;
 	}
+
+	public List<List<int>> PreparseMusic (string musictext) {
+		int measure;
+		List<int> section = new List<int>();
+		List<List<int>> listSections = new List<List<int>>();
+		foreach(char c in musictext) {
+			if (c.ToString().Equals("/")) {
+				listSections.Add(section);
+			}
+			else {
+				measure = int.Parse(c.ToString());
+				section.Add(measure);
+			}
+		}
+		return listSections;
+	}
 	/*void SegmentString(string text) {
 		//called by other scripts. Will parse string into string lists
 		//List <string> temp = new List <string> ();
@@ -207,6 +223,11 @@ public class GameManager : MonoBehaviour {
 			StartCoroutine(ReleaseLock());
 		}
 
+	}
+
+	public void TriggerGameOver() {
+		//player.healthBar = 100.0f;
+		player.transform.position = environmentObject.GetComponent<EnvironmentScript>().PlayerSpawnPoint;
 	}
 
 	// Update is called once per frame
