@@ -123,6 +123,7 @@ public class GameManager : MonoBehaviour {
 		foreach(char c in musictext) {
 			if (c.ToString().Equals("/")) {
 				listSections.Add(section);
+				section = new List<int>();
 			}
 			else {
 				measure = int.Parse(c.ToString());

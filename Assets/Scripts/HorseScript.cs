@@ -42,9 +42,9 @@ public class HorseScript : MonoBehaviour {
 	    horseTextList = GameManager.GM.PreparseText(horseText);
    		musicScript = musicObject.GetComponent<MusicManager>();
 
-	    Renderer rend = GetComponent<Renderer>();
+	    /*Renderer rend = GetComponent<Renderer>();
 	    rend.material.shader = Shader.Find(material_name);
-	    rend.material.SetColor("_Color", color);
+	    rend.material.SetColor("_Color", color);*/
 	}
 
 	void TransitionTrack() {
@@ -94,12 +94,12 @@ public class HorseScript : MonoBehaviour {
 
 	void FollowPlayer() {
 		//Move
-		Vector3 nextPos = (player.transform.position - this.transform.position).normalized;
+		Vector3 nextPos = (player.transform.position - transform.position).normalized;
 		//ramp up
 	    if (velocity < max_velocity) {
 	      if (isOnGround) velocity += GameManager.GM.environmentObject.GetComponent<EnvironmentScript>().acceleration * 0.15f;
 
-	      if (velocity > max_velocity) velocity = 1.0f;
+	      if (velocity > max_velocity) velocity = max_velocity;
 	    }
 	    //ramp down
 	    if (velocity > max_velocity) {

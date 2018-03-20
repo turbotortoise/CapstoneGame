@@ -84,7 +84,7 @@ public class MusicManager : MonoBehaviour {
 				break;
 			}
 		}
-		if (i == AudioSourceList.Count) {
+		if (i >= AudioSourceList.Count) {
 			print("set audio failed, not enough room");
 		}
 		return i;
@@ -110,7 +110,7 @@ public class MusicManager : MonoBehaviour {
 		if (Time.time > nextBeatTime) {
 			//Start the next beat
 			prevBeatTime = nextBeatTime;
-			nextBeatTime = prevBeatTime + (60.0f / (float)current_tempo);
+			nextBeatTime = prevBeatTime + (60.0f / (float)current_tempo); //eighth notes
 		}
 		if (current_tempo == tempo) {
 			//check equality for race conditions
@@ -173,15 +173,6 @@ public class MusicManager : MonoBehaviour {
 						}
 					}
 				}
-				//trigger metonome dependent functions
-				if (player.companionObject != null) {
-					if (player.companionObject.tag == "Horse") {
-						player.companionObject.GetComponent<HorseScript>().Metronome();
-					}
-					else if (player.companionObject.tag == "Dog") {
-						//dog doesn't do anything yet
-					}
-				}
 
 			}
 			else if (GameManager.GM.converseMode) {
@@ -198,58 +189,22 @@ public class MusicManager : MonoBehaviour {
 				}
 			}
 			else if (GameManager.GM.fightMode) {
-				if (walkMusicIndex >= 0)
+				if ((fightMusicIndex >= 0) && (!AudioSourceList[fightMusicIndex].isPlaying)) {
+					AudioSourceList[fightMusicIndex].Play();
+				}
+				if ((walkMusicIndex >= 0) && (AudioSourceList[walkMusicIndex].isPlaying))
 					AudioSourceList[walkMusicIndex].Pause();
-				if (fightMusicIndex >= 0) {
-					//Only goes through this once
-					if ((AudioSourceList[fightMusicIndex].clip == alertMusic) && (!AudioSourceList[fightMusicIndex].isPlaying)) {
-						AudioSourceList[fightMusicIndex].clip = fightMusic;
-						AudioSourceList[fightMusicIndex].Play();
-					}
-					//if nothing is playing
-					if (!transitionTrigger) {
-						if (!AudioSourceList[fightMusicIndex].isPlaying) {
-							if (enemyProgressIndex == (enemy_Music.Count - 1)) {
-								print("Enemy defeated, quit music");
-								enemyProgressIndex = 0;
-								fightMusic = null;
-								AudioSourceList[fightMusicIndex].Stop();
-								AudioSourceList[fightMusicIndex].clip = null;
-								fightMusicIndex = -1;
-								tempo = walkMusicTempo;
-								GameManager.GM.Switch("Walk");
-								AudioSourceList[walkMusicIndex].Play();
-							}
-							else if ((enemyProgressIndex % 2) == 1) {
-								enemyProgressIndex ++;
-								fightMusic = enemy_Music[enemyProgressIndex];
-								AudioSourceList[fightMusicIndex].clip = fightMusic;
-								AudioSourceList[fightMusicIndex].Play();
-							}
-							else if (((enemyProgressIndex % 2) == 0) && (enemyProgressIndex < enemy_Music.Count)) {
-								AudioSourceList[fightMusicIndex].Play();
-							}
-						}
-					}
-					else {
-						print("Transitioning");
-						//enemy hit, move to next clip
-						transitionTrigger = false;
-						if (enemyProgressIndex % 2 == 1)
-							enemyProgressIndex += 2;
-						else
-							enemyProgressIndex++;
-						print("enemyIndex: " + enemyProgressIndex);
-						AudioSourceList[fightMusicIndex].Stop();
-						AudioSourceList[fightMusicIndex].clip = enemy_Music[enemyProgressIndex];
-						print("clip name: " + enemy_Music[enemyProgressIndex].name);
-						AudioSourceList[fightMusicIndex].Play();
-					}
+
+				if (GameManager.GM.fightObject.GetComponent<AudioSource>().clip != fightMusic) {
+					fightMusic = GameManager.GM.fightObject.GetComponent<AudioSource>().clip;
+					StartCoroutine(FadeOut(fightMusicIndex));
+					fightMusicIndex = SetAudioSource(GameManager.GM.fightObject.GetComponent<AudioSource>().clip);
+					AudioSourceList[fightMusicIndex].Play();
 				}
 			}
 		}
 		else {
-			//race condition: tempo changed, another Coroutine will start with correct tempo
+			//tempo changed, next beat begins new tempo
 			print("tempo change");
 			current_tempo = tempo;
 		}
@@ -283,26 +238,6 @@ public class MusicManager : MonoBehaviour {
 		tempo = newtempo;
 		converseMusic = music;
 	}
-	public void receiveFightMusic(AudioClip alert, AudioClip fight_1, AudioClip fight_2, AudioClip fight_3, 
-								  AudioClip trans_1, AudioClip trans_2, AudioClip defeat, int newtempo) {
-		enemyProgressIndex = 0;
-		tempo = newtempo;
-		fightMusic = fight_1;
-		enemy_Music.Clear();
-		enemy_Music.Add(fight_1);
-		enemy_Music.Add(trans_1);
-		enemy_Music.Add(fight_2);
-		enemy_Music.Add(trans_2);
-		enemy_Music.Add(fight_3);
-		enemy_Music.Add(defeat);
-		alertMusic = alert;
-		transitionMusic = trans_1;
-		int i = SetAudioSource(alert);
-		fightMusicIndex = i;
-		if (walkMusicIndex >= 0)
-			AudioSourceList[walkMusicIndex].volume = 0.2f; //change to fade out
-		AudioSourceList[i].Play();
-	}
 	public void receiveWalkMusic(AudioClip music, AudioClip transition, int newtempo) {
 		//print("audioname: " + music.name);
 		if (walkMusicIndex < 0) {
@@ -324,8 +259,7 @@ public class MusicManager : MonoBehaviour {
 			tempo = newtempo;
 			walkMusic = AudioSourceList[walkMusicIndex].clip;
 			if ((prevIndex >= 0) && (prevIndex != walkMusicIndex)) {
-				AudioSourceList[prevIndex].Stop();
-				AudioSourceList[prevIndex].clip = null;
+				StartCoroutine(FadeOut(prevIndex));
 			}
 		}
 	}
@@ -365,6 +299,31 @@ public class MusicManager : MonoBehaviour {
 			}
 		}
 	}
+
+	IEnumerator FadeOut(int audioSourceIndex) {
+		if (AudioSourceList[audioSourceIndex].clip != null) {
+			if (AudioSourceList[audioSourceIndex].volume > 0.05f)
+				AudioSourceList[audioSourceIndex].volume -= (AudioSourceList[audioSourceIndex].volume * Time.deltaTime);
+			else {
+				AudioSourceList[audioSourceIndex].clip = null;
+				AudioSourceList[audioSourceIndex].volume = 1.0f;
+			}
+		}
+		yield return new WaitForSeconds(Time.deltaTime);
+		if (AudioSourceList[audioSourceIndex].clip != null) StartCoroutine(FadeOut(audioSourceIndex));
+	}
+
+	IEnumerator QuickFadeOut_Indestructive(int audioSourceIndex) {
+		if (AudioSourceList[audioSourceIndex].volume > 0.05f) {
+			AudioSourceList[audioSourceIndex].volume -= (5.0f * AudioSourceList[audioSourceIndex].volume * Time.deltaTime);
+			yield return new WaitForSeconds(Time.deltaTime);
+			StartCoroutine(QuickFadeOut_Indestructive(audioSourceIndex));
+		}
+		else {
+			AudioSourceList[audioSourceIndex].volume = 0.0f;
+			yield return new WaitForSeconds(Time.deltaTime);
+		}
+	}
 	
 	// Update is called once per frame
 	void Update () {
@@ -387,21 +346,14 @@ public class MusicManager : MonoBehaviour {
 					walkMusicIndex = SetAudioSource(transitionMusic);
 				}
 			}
-			if ((walkMusicIndex >= 0) && (AudioSourceList[walkMusicIndex].volume < 1.0f)) {
-				AudioSourceList[walkMusicIndex].volume = 1.0f;
-			}
 			//add condition that we switched from fight to walk mode
 			if (fightMusic != null) {
 				fightMusic = null;
-				AudioSourceList[fightMusicIndex].Stop();
-				AudioSourceList[fightMusicIndex].clip = null;
-				fightMusicIndex = -1;
+				StartCoroutine(FadeOut(fightMusicIndex));
 			}
 			if ((converseMusicIndex >= 0) && (converseMusic != null)) {
 				converseMusic = null;
-				AudioSourceList[converseMusicIndex].Stop();
-				AudioSourceList[converseMusicIndex].clip = null;
-				converseMusicIndex = -1;
+				StartCoroutine(FadeOut(converseMusicIndex));
 			}
 		}
 		else if (GameManager.GM.converseMode) {
@@ -417,24 +369,14 @@ public class MusicManager : MonoBehaviour {
 			//	AudioQueue.Add(player.hitEffect);
 			//}
 
-			if (fightMusic != null) {
-				if (fightMusicIndex == -1) {
-					fightMusicIndex = SetAudioSource(alertMusic);
-				}
+			if (fightMusic != GameManager.GM.fightObject.GetComponent<AudioSource>().clip) {
+				fightMusic = GameManager.GM.fightObject.GetComponent<AudioSource>().clip;
+				fightMusicIndex = SetAudioSource(fightMusic);
 			}
 
-			//also need to add condition that we are switching from walk to fight mode
-			/*if ((walkMusic != null) && (walkMusicIndex >= 0)) {
-				walkMusic = null;
-				print(walkMusicIndex);
-				AudioSourceList[walkMusicIndex].Stop();
-				walkMusicIndex = -1;
-			}*/
 			if ((converseMusic != null) && (converseMusicIndex >= 0)) {
 				converseMusic = null;
-				AudioSourceList[converseMusicIndex].Stop();
-				AudioSourceList[converseMusicIndex].clip = null;
-				converseMusicIndex = -1;
+				StartCoroutine(FadeOut(converseMusicIndex));
 			}
 
 		}

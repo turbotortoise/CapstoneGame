@@ -39,9 +39,9 @@ public class Meche_TreeScript : MonoBehaviour {
 		attackRadius = triggerRadius / 2.0f;
     	musicScript = musicObject.GetComponent<MusicManager>();
 	    //set color (for not white everything)
-	    Renderer rend = GetComponent<Renderer>();
+	    /*Renderer rend = GetComponent<Renderer>();
 	    rend.material.shader = Shader.Find(material_name);
-	    rend.material.SetColor("_SpecColor", color);
+	    rend.material.SetColor("_SpecColor", color);*/
 	}  
 
 	void FollowPlayer() {
@@ -93,8 +93,8 @@ public class Meche_TreeScript : MonoBehaviour {
 		            GameManager.GM.PriorityFightObject(this.gameObject, priority); //set this to fight object if there is higher priority
 		          }
 		          GameManager.GM.Switch("Fight");
-		          musicScript.receiveFightMusic(alertMusic, fightMusic_1, fightMusic_2, fightMusic_3,
-		                                        transition_1, transition_2, defeatMusic, tree_tempo);
+		          //musicScript.receiveFightMusic(alertMusic, fightMusic_1, fightMusic_2, fightMusic_3,
+		          //                              transition_1, transition_2, defeatMusic, tree_tempo);
 		        }
 		      }
 		      else {

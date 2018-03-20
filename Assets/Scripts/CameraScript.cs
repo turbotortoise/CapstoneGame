@@ -11,6 +11,7 @@ public class CameraScript : MonoBehaviour {
 	//rotation
 	private float rotate_x = 0.0f;
 	private float rotate_z = -80.0f;
+	private float max_speed = 100.0f;
 
 	private float deadMvt = 0.2f;
   	private float horzMovement;
@@ -18,13 +19,20 @@ public class CameraScript : MonoBehaviour {
   	private float trigMovement;
   	private float scaling_factor = 0.02f; //To be used on enemies
 
+  	//Movement
+  	private Vector3 nextPos;
+  	private float startTime;
+  	private Vector3 startTimePos;
+
 	Transform thisTransform;
 
 	void Awake() {
+		startTime = Time.time;
 		FocusPosition = target.position;
 		thisTransform = transform;
 		thisTransform.position = target.position + diameter;
 		thisTransform.position = new Vector3(thisTransform.position.x, -1.8f, thisTransform.position.z);
+		startTimePos = thisTransform.position;
 	}
 
 	void Start() {
@@ -74,15 +82,26 @@ public class CameraScript : MonoBehaviour {
 				FocusPosition = target.position;
 			}
 		}
-		thisTransform.position = target.position + new Vector3(
+		nextPos = new Vector3(
 			(diameter.x * RotateScale.x) * Mathf.Sin(Mathf.Deg2Rad * rotate_z) * Mathf.Cos(Mathf.Deg2Rad * rotate_x),
 			(diameter.y * RotateScale.y) * Mathf.Cos(Mathf.Deg2Rad * rotate_z),
 			(diameter.z * RotateScale.z) * Mathf.Sin(Mathf.Deg2Rad * rotate_z) * Mathf.Sin(Mathf.Deg2Rad * rotate_x));
+		thisTransform.position = target.position + nextPos;
 		thisTransform.LookAt(FocusPosition);
 		if (GameManager.GM.fightMode) {
 			Vector3 playerToEnemy = (GameManager.GM.fightObject.transform.position - target.position) * scaling_factor;
-			thisTransform.position = thisTransform.position - playerToEnemy;
+			nextPos -= playerToEnemy;
 		}
+		if (nextPos == Vector3.zero) {
+			startTime = Time.time;
+			startTimePos = thisTransform.position;
+		}
+		/*float distCovered = (Time.time - startTime) * max_speed;
+		float journeyLength = Vector3.Distance(startTimePos, target.position);
+		float fracJourney;
+		if (journeyLength == 0.0f) fracJourney = 0.0f;
+		else fracJourney = distCovered / journeyLength;
+		thisTransform.position = Vector3.Lerp(thisTransform.position, (target.position + nextPos), fracJourney);*/
 
 	}
 }

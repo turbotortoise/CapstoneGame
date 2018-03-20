@@ -53,6 +53,8 @@
      <Compile Include="Assets\Scripts\Enemy.cs" />
      <Compile Include="Assets\Scripts\EnvironmentScript.cs" />
      <Compile Include="Assets\Scripts\GameManager.cs" />
+     <Compile Include="Assets\Scripts\GenericSpiderTreeScript.cs" />
+     <Compile Include="Assets\Scripts\GlobScript.cs" />
      <Compile Include="Assets\Scripts\GravityScript.cs" />
      <Compile Include="Assets\Scripts\HorseScript.cs" />
      <Compile Include="Assets\Scripts\LevelTransitionScript.cs" />
@@ -68,13 +70,17 @@
      <None Include="Assets\Scripts\Text\Spider_Woods\VillageSpiderMusic.txt" />
      <None Include="Assets\Scripts\Text\Spider_Village\OrbSpiderText.txt" />
      <None Include="Assets\Scripts\Text\Spider_Village\JumperSpiderText.txt" />
+     <None Include="Assets\Scripts\Text\Spider_Woods\BossSpiderMusic.txt" />
      <None Include="Assets\Scripts\Text\Spider_Woods\HiddenSpiderMusic.txt" />
      <None Include="Assets\Scripts\Text\Spider_Village\SpoolSpiderText.txt" />
+     <None Include="Assets\TSF\Shaders\TSFOutline.shader" />
      <None Include="Assets\Scripts\Text\Spider_Woods\SmallSpiderEnemyMusic.txt" />
+     <None Include="Assets\TSF\Shaders\TSF.shader" />
      <None Include="Assets\Scripts\Text\Spider_Village\SpeckSpiderText.txt" />
      <None Include="Assets\Scripts\Text\Spider_Woods\MediumSpiderEnemyMusic.txt" />
      <None Include="Assets\Scripts\Text\Spider_Village\EnemySpiderText.txt" />
      <None Include="Assets\Scripts\Text\Spider_Village\HiddenSpiderText.txt" />
+     <None Include="Assets\Scripts\Text\Spider_Woods\LargeSpiderEnemyMusic.txt" />
      <None Include="Assets\Scripts\Text\Spider_Village\SpepSpiderText.txt" />
      <None Include="Assets\Scripts\Text\Spider_Village\HorseText.txt" />
  <Reference Include="UnityEngine.UI">

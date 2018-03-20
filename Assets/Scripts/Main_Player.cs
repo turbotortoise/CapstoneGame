@@ -68,9 +68,9 @@ public class Main_Player : MonoBehaviour {
     musicScript = musicObject.GetComponent<MusicManager>();
     
     //set color
-    Renderer rend = GetComponent<Renderer>();
+    /*Renderer rend = GetComponent<Renderer>();
     rend.material.shader = Shader.Find("Diffuse");
-    rend.material.SetColor("_Color", color);
+    rend.material.SetColor("_Color", color);*/
   }
 
   public void ChangeAttributes(float env_gravity, float env_air_resist) {

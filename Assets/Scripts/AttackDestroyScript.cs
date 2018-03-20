@@ -14,11 +14,11 @@ public class AttackDestroyScript : MonoBehaviour {
 		timeMultiplier = (60.0f / (float)tempo) * length;
 		StartCoroutine(Self_Destruct());
 		Renderer rend = GetComponent<Renderer>();
-    	rend.material.shader = Shader.Find("Diffuse");
+    	//rend.material.shader = Shader.Find("Diffuse");
 
-    	approxColor.r += Random.Range(-0.01f, 0.01f);
-    	approxColor.g += Random.Range(-0.01f, 0.01f);
-    	approxColor.b += Random.Range(-0.01f, 0.01f);
+    	approxColor.r += Random.Range(-0.05f, 0.05f);
+    	approxColor.g += Random.Range(-0.05f, 0.05f);
+    	approxColor.b += Random.Range(-0.05f, 0.05f);
     	//Color color = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f));
     	rend.material.SetColor("_Color", approxColor);
 	}

@@ -200,8 +200,8 @@ public class LizardScript : MonoBehaviour {
               GameManager.GM.PriorityFightObject(this.gameObject, priority); //set this to fight object if there is higher priority
             }
             GameManager.GM.Switch("Fight");
-            musicScript.receiveFightMusic(alertMusic, fightMusic_1, fightMusic_2, fightMusic_3,
-                                          transition_1, transition_2, defeatMusic, lizard_tempo);
+            //musicScript.receiveFightMusic(alertMusic, fightMusic_1, fightMusic_2, fightMusic_3,
+            //                              transition_1, transition_2, defeatMusic, lizard_tempo);
           }
           else {
             Pace();
